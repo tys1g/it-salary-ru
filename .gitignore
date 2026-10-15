@@ -1,0 +1,14 @@
+# данные не публикуем: в вакансиях бывают персональные данные
+data/
+*.parquet
+*.html.gz
+
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# секреты
+.env
