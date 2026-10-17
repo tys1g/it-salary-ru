@@ -26,12 +26,21 @@ USER_AGENT = os.getenv(
 )
 
 # Ключевые слова для поиска IT-профессий среди страниц /vacancies/<slug>.
-# Это латиница из транслитерированных названий профессий в карте сайта.
-IT_SLUG_KEYWORDS = [
+# Slug режем по «-» на слова и сравниваем каждое слово целиком или по началу.
+# Раньше искали подстроку, и «produkt» ловил «administrator-produktovogo-magazina».
+
+# Слово начинается с одного из этих префиксов → IT (длинные, без ложных совпадений).
+IT_SLUG_PREFIXES = [
     "developer", "razrabotchik", "programmist", "python", "golang", "java",
-    "frontend", "backend", "fullstack", "devops", "sre", "data", "analitik",
-    "analyst", "ml", "machine", "qa", "testirovshik", "tester", "android",
-    "ios", "kotlin", "swift", "php", "c-", "1c", "sistemnyj", "arhitektor",
-    "architect", "tehlid", "teamlead", "inzhener-po-dannym", "devsecops",
-    "sql", "bi-", "product-manager", "produkt", "unity", "rust", "scala",
+    "frontend", "backend", "fullstack", "devops", "devsecops", "analitik",
+    "analyst", "machine", "testirovsh", "tester", "android", "kotlin", "swift",
+    "sistemnyj", "architect", "tehlid", "teamlead", "scala", "unity", "rust",
+    "product", "scientist", "engineer", "postgres", "mysql", "mssql", "oracle",
 ]
+# Короткие слова: только точное совпадение, иначе «ml» найдётся где угодно.
+IT_SLUG_WORDS = {"ml", "qa", "1c", "sre", "ios", "php", "go", "bi", "sql", "data", "it", "c"}
+# Если в slug есть такое слово — это точно не IT, даже если нашлось ключевое.
+NON_IT_SLUG_WORDS = {
+    "magazina", "magazin", "prodazh", "prodazham", "sklada", "kassir",
+    "torgovogo", "zala", "restorana", "gostinicy", "salona", "ofisa",
+}

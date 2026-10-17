@@ -8,6 +8,7 @@
 
 import csv
 import logging
+import random
 import re
 from xml.etree import ElementTree as ET
 
@@ -58,6 +59,16 @@ def by_sitemap(client: PoliteClient) -> list[dict]:
     return rows
 
 
+def is_it_slug(slug: str) -> bool:
+    """Похожа ли профессия на IT. Смотрим на отдельные слова slug, а не на подстроки."""
+    words = slug.lower().split("-")
+    if any(w in config.NON_IT_SLUG_WORDS for w in words):
+        return False
+    if any(w in config.IT_SLUG_WORDS for w in words):
+        return True
+    return any(w.startswith(p) for w in words for p in config.IT_SLUG_PREFIXES)
+
+
 def it_slugs(client: PoliteClient) -> list[str]:
     slugs = []
     for sm in sitemap_files(client, "vacancies"):
@@ -68,7 +79,7 @@ def it_slugs(client: PoliteClient) -> list[str]:
         found = 0
         for loc, _ in locs:
             slug = loc.rstrip("/").rsplit("/", 1)[-1]
-            if any(k in slug for k in config.IT_SLUG_KEYWORDS):
+            if is_it_slug(slug):
                 slugs.append(slug)
                 found += 1
         log.info("%s: профессий %d, из них IT %d", sm.rsplit("/", 1)[-1], len(locs), found)
@@ -78,6 +89,9 @@ def it_slugs(client: PoliteClient) -> list[str]:
 def by_it_slugs(client: PoliteClient, max_slugs: int | None = None) -> list[dict]:
     slugs = it_slugs(client)
     log.info("найдено IT-профессий: %d", len(slugs))
+    # Перемешиваем с фиксированным seed: иначе --max-slugs 20 берёт первые 20 по алфавиту
+    # (одни «administrator-…»), а нам нужна разнообразная выборка профессий.
+    random.Random(42).shuffle(slugs)
     rows, seen = [], set()
     for slug in slugs[:max_slugs]:
         resp = client.get(f"{config.BASE_URL}/vacancies/{slug}")
