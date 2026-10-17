@@ -13,7 +13,7 @@ import logging
 
 import pandas as pd
 
-from . import config, discover, fetch, parse
+from . import config, discover, fetch, parse, trudvsem
 from .http import PoliteClient
 
 
@@ -62,6 +62,20 @@ def cmd_inspect(args):
     print(json.dumps(row, ensure_ascii=False, indent=2, default=str))
 
 
+def cmd_trudvsem(args):
+    rows = trudvsem.fetch_vacancies(
+        queries=args.query,
+        limit_per_query=args.limit,
+        page_size=args.page_size,
+    )
+    df = pd.DataFrame(rows)
+    config.DATA_DIR.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(config.TRUDVSEM_PARSED_FILE, index=False)
+    print(f"собрано вакансий: {len(df)}")
+    print(f"с зарплатой: {int((df['salary_from'].notna() | df['salary_to'].notna()).sum()) if len(df) else 0}")
+    print(f"сохранено в {config.TRUDVSEM_PARSED_FILE}")
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     ap = argparse.ArgumentParser(prog="hhparser")
@@ -83,6 +97,21 @@ def main():
     p = sub.add_parser("inspect", help="показать, что есть на странице вакансии")
     p.add_argument("id")
     p.set_defaults(func=cmd_inspect)
+
+    p = sub.add_parser("trudvsem", help="скачать вакансии из открытого API Работа России")
+    p.add_argument(
+        "--query", action="append", required=True,
+        help="поисковая фраза; можно указать несколько раз",
+    )
+    p.add_argument(
+        "--limit", type=int, default=100,
+        help="максимум вакансий на одну фразу (по умолчанию 100)",
+    )
+    p.add_argument(
+        "--page-size", type=int, default=100,
+        help="размер страницы API, максимум 100",
+    )
+    p.set_defaults(func=cmd_trudvsem)
 
     args = ap.parse_args()
     args.func(args)

@@ -11,6 +11,7 @@ DATA_DIR = Path(os.getenv("HH_DATA_DIR", "data"))
 RAW_DIR = DATA_DIR / "raw"            # скачанные страницы вакансий, html.gz
 IDS_FILE = DATA_DIR / "ids.csv"       # найденные ссылки на вакансии
 PARSED_FILE = DATA_DIR / "vacancies.parquet"
+TRUDVSEM_PARSED_FILE = DATA_DIR / "trudvsem_vacancies.parquet"
 
 # Вежливость. Не уменьшай задержку: частые запросы = бан IP и нагрузка на чужой сайт.
 DELAY_SECONDS = float(os.getenv("HH_DELAY", "3.0"))   # базовая пауза между запросами

@@ -28,8 +28,13 @@ python -m hhparser ids --mode it --max-slugs 20   # найти id IT-вакан�
 python -m hhparser fetch --limit 200              # скачать страницы
 python -m hhparser parse                          # разобрать в data/vacancies.parquet
 python -m hhparser inspect <id>                   # посмотреть, что парсер видит на странице
+python -m hhparser trudvsem --query "системный администратор" --limit 100
+# отдельный открытый источник; результат: data/trudvsem_vacancies.parquet
 
 pytest                                            # тесты разбора
 ```
 
 Настройки — переменные окружения `HH_DELAY`, `HH_USER_AGENT`, `HH_DATA_DIR` (см. `hhparser/config.py`).
+
+Ноутбуки предназначены для EDA, подготовки данных и ML. Сбор из API «Работа России» запускается отдельно через `python -m hhparser trudvsem`.
+Выгрузка сохраняет только поля, нужные для анализа; контакты, ИНН и контактные лица не сохраняются.
