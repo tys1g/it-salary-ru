@@ -12,3 +12,4 @@ __pycache__/
 
 # секреты
 .env
+.DS_Store
