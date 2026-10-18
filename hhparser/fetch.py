@@ -24,11 +24,12 @@ def fetch_all(limit: int | None = None, shuffle: bool = True) -> None:
     with config.IDS_FILE.open(newline="") as f:
         ids = [r["id"] for r in csv.DictReader(f)]
     todo = [i for i in ids if not raw_path(i).exists()]
+    already = len(ids) - len(todo)  # считаем ДО обрезки по limit, иначе цифра врёт
     if shuffle:
         random.shuffle(todo)  # случайная выборка лучше, чем первые N по порядку
     if limit:
         todo = todo[:limit]
-    log.info("в очереди %d страниц (уже скачано %d)", len(todo), len(ids) - len(todo))
+    log.info("всего id %d, уже скачано %d, в очереди сейчас %d", len(ids), already, len(todo))
 
     client = PoliteClient()
     done = gone = 0
